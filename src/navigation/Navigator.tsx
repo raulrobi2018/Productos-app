@@ -10,6 +10,8 @@ const Stack = createStackNavigator();
 export const Navigator = () => {
   const {status} = useContext(AuthContext);
 
+  if (status === 'checking') return <LoginScreen />;
+
   return (
     <Stack.Navigator
       screenOptions={{
