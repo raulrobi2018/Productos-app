@@ -65,26 +65,31 @@ export const AuthProvider = ({children}: any) => {
 
   const signIn = async ({correo, password}: LoginData) => {
     try {
-      const {data} = await cafeApi.post<LoginResponse>('/auth/login', {
-        correo,
-        password,
-      });
+      await cafeApi
+        .post<LoginResponse>('/auth/login', {
+          correo,
+          password,
+        })
+        .then(async data => {
+          //   Hacemos el dispatch de la acción signUp y el reducer establecerá los nuevos
+          // valores que allí especifique
+          dispatch({
+            type: 'signUp',
+            payload: {
+              token: data.data.token,
+              user: data.data.usuario,
+            },
+          });
 
-      //   Hacemos el dispatch de la acción signUp y el reducer establecerá los nuevos
-      // valores que allí especifique
-      dispatch({
-        type: 'signUp',
-        payload: {
-          token: data.token,
-          user: data.usuario,
-        },
-      });
-
-      //Guardo el token en el storage
-      await AsyncStorage.setItem('token', data.token);
+          //Guardo el token en el storage
+          await AsyncStorage.setItem('token', data.data.token);
+        })
+        .catch(err => {
+          console.log('Error de conexion', err);
+        });
     } catch (error: any) {
       console.log('error');
-      console.log(error.response.data.msg);
+      console.log(error.response.data);
       dispatch({
         type: 'addError',
         payload: error.response.data.msg || 'Información incorrecta',
