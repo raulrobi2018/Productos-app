@@ -5,7 +5,7 @@ import {Producto, ProductsResponse} from '../interfaces/productInterface';
 type ProductsContextProps = {
   products: Producto[];
   loadProducts: () => Promise<void>;
-  addProduct: (categoryId: string, productName: string) => Promise<void>;
+  addProduct: (categoryId: string, productName: string) => Promise<Producto>;
   updateProduct: (
     categoryId: string,
     productName: string,
@@ -33,18 +33,48 @@ export const ProductsProvider = ({children}: any) => {
     console.log(products);
   };
 
-  const addProduct = async (categoryId: string, productName: string) => {};
+  const addProduct = async (
+    categoryId: string,
+    productName: string,
+  ): Promise<Producto> => {
+    try {
+      const resp = await cafeApi.post<Producto>('/productos', {
+        nombre: productName,
+        categoria: categoryId,
+      });
+      setProducts([...products, resp.data]);
+      return resp.data;
+    } catch (error) {
+      console.log('Error al crear el producto ' + error);
+    }
+  };
 
   const updateProduct = async (
     categoryId: string,
     productName: string,
     productId: string,
-  ) => {};
+  ) => {
+    try {
+      const resp = await cafeApi.put<Producto>(`/productos/${productId}`, {
+        nombre: productName,
+        categoria: categoryId,
+      });
+      setProducts(
+        products.map(prod => {
+          return prod._id === productId ? resp.data : prod;
+        }),
+      );
+    } catch (error) {
+      console.log('Error al actualizar el producto ' + error);
+    }
+  };
 
   const deleteProduct = async (id: string) => {};
 
-  const loadProductById = async (id: string) => {
-    throw new Error('Not implemented');
+  const loadProductById = async (id: string): Promise<Producto> => {
+    const resp = await cafeApi.get<Producto>(`/productos/${id}`);
+
+    return resp.data;
   };
 
   // TODO: cambiar ANY

@@ -18,10 +18,18 @@ export const useForm = <T extends Object>(initState: T) => {
     });
   };
 
+  const setFormValue = (formValues: T) => {
+    setForm({
+      ...form,
+      ...formValues,
+    });
+  };
+
   return {
     //Con esta línea desestructura todo el formulario
     ...form,
     form,
     onChange,
+    setFormValue,
   };
 };
